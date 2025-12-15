@@ -28,7 +28,6 @@
 
 # %% id="mhQAMdomm9JK"
 # !pip install git+https://github.com/google-research/zapbench.git#egg=zapbench
-
 # %% id="QhH3KuMtk_MT"
 from zapbench import constants
 from zapbench import data_utils
@@ -52,12 +51,6 @@ source = data_source.TensorStoreTimeSeries(config)
 
 print(f'{len(source)=}')
 
-# %% [markdown] id="WNzr8t6_od6Z"
-# We'll briefly setup pretty-printing, and then index into the data source to get elements:
-
-# %% id="DR2mtKo1pDnm"
-# !pip install treescope
-
 # %% id="mznamK0To7-n"
 import treescope
 treescope.basic_interactive_setup(autovisualize_arrays=True)
@@ -72,23 +65,10 @@ source[0]
 # %% [markdown] id="vEO_xsi0p_1N"
 # By enabling `prefetch` on `data_source.TensorStoreTimeSeries`, we can load the entire data into memory upfront. This makes indexing significantly faster once the source has been initialized.
 
-# %% id="yJ4vw4oMqrm6"
-import random
-
-source = data_source.TensorStoreTimeSeries(config, prefetch=False)  # Default
-
-# %% id="PKYe1kJvkAQi"
-# %%timeit
-_ = source[random.randint(0, len(source)-1)]
-
 # %% id="lktbCrGZqwQ7"
 
 # NOTE(tk) 4:52m on Mac M4
 source = data_source.TensorStoreTimeSeries(config, prefetch=True)
-
-# %% id="_zlzE3uqqxp_"
-# %%timeit
-_ = source[random.randint(0, len(source)-1)]
 
 # %% [markdown] id="wAT0jhfe_f_p"
 # We can also create a data source that combines data from all training conditions (should take about a minute to prefetch):
@@ -162,25 +142,18 @@ data_loader = grain.DataLoader(
 # %% id="Iv5mQQQYiNtB"
 import numpy as np
 
+npred = constants.PREDICTION_WINDOW_LENGTH
 
 def f_mean(past_activity: np.ndarray) -> np.ndarray:
-  """Mean baseline
+  """Mean baseline. (time x neurons) -> (pred_time x neurons)"""
+  return past_activity.mean(axis=0).reshape((1, -1)).repeat(npred, axis=0)
 
-  Args:
-    past_activity: Past activity as time x neurons matrix.
-
-  Returns:
-    Predicted activity calculated by taking the per-neuron mean across time and
-    repeating it for all 32 timesteps in the prediction horizon.
-  """
-  return past_activity.mean(axis=0).reshape((1, -1)).repeat(
-      constants.PREDICTION_WINDOW_LENGTH, axis=0)
-
-
-# %% [markdown] id="m5gozhtfB1YU"
-# For inference, we create a data source containing the full trace matrix, and index it as described in [the manuscript](https://openreview.net/pdf?id=oCHsDpyawq) (section 3.2) to compute metrics.
 
 # %% id="Qlywvmcqi0RZ"
+
+# NOTE(tk) 24.8m
+# indexing as in section 3.2
+# https://openreview.net/pdf?id=oCHsDpyawq
 infer_source = data_source.TensorStoreTimeSeries(
     data_source.TensorStoreTimeSeriesConfig(
         input_spec=data_utils.get_spec('240930_traces'),
@@ -194,7 +167,7 @@ infer_source = data_source.TensorStoreTimeSeries(
 from collections import defaultdict
 
 from connectomics.jax import metrics
-
+from tqdm import tqdm
 
 # Placeholder for results
 MAEs = defaultdict(list)
@@ -223,7 +196,7 @@ for condition_id, condition_name in tqdm(enumerate(constants.CONDITION_NAMES)):
 import matplotlib.pyplot as plt
 
 
-steps_ahead = np.arange(32) + 1
+steps_ahead = np.arange(npred) + 1
 
 for condition_name in constants.CONDITION_NAMES:
   mae = np.stack(MAEs[condition_name]).mean(axis=0)  # Average over windows
@@ -233,7 +206,7 @@ plt.title('mean baseline, short context')
 plt.xlabel('steps predicted ahead')
 plt.ylabel('MAE')
 plt.ylim((0.015, 0.06))
-plt.xlim(1, 32)
+plt.xlim(1, npred)
 plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
 plt.show()
 
