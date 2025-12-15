@@ -59,7 +59,47 @@ ds = ts.open({
 
 # Display info about the dataset.
 print(ds.schema)
+# Schema({
+#   'chunk_layout': {
+#     'grid_origin': [0, 0, 0, 0],
+#     'inner_order': [3, 2, 1, 0],
+#     'read_chunk': {'shape': [512, 512, 1, 1]},
+#     'write_chunk': {'shape': [512, 512, 1, 1]},
+#   },
+#   'codec': {
+#     'codecs': [
+#       {'configuration': {'order': [3, 2, 1, 0]}, 'name': 'transpose'},
+#       {'configuration': {'endian': 'little'}, 'name': 'bytes'},
+#       {
+#         'configuration': {
+#           'blocksize': 0,
+#           'clevel': 4,
+#           'cname': 'zstd',
+#           'shuffle': 'shuffle',
+#           'typesize': 2,
+#         },
+#         'name': 'blosc',
+#       },
+#     ],
+#     'driver': 'zarr3',
+#   },
+#   'dimension_units': [
+#     [406.0, 'nm'],
+#     [406.0, 'nm'],
+#     [4000.0, 'nm'],
+#     [0.9141, 's'],
+#   ],
+#   'domain': {
+#     'exclusive_max': [[2048], [1328], [72], [7879]],
+#     'inclusive_min': [0, 0, 0, 0],
+#     'labels': ['x', 'y', 'z', 't'],
+#   },
+#   'dtype': 'uint16',
+#   'fill_value': 0,
+#   'rank': 4,
+# })
 
+# %%
 # Fetch a xy-slice using the handle.
 z, t = 36, 0
 example_xy_slice = ds[:, :, z, t].read().result()
@@ -119,6 +159,7 @@ for condition_id, condition_name in enumerate(constants.CONDITION_NAMES):
   inclusive_min, exclusive_max = data_utils.get_condition_bounds(condition_id)
   print(f'{condition_name} has bounds [{inclusive_min}, {exclusive_max}).')
 
+# NOTE(tk) padding 2 seems 1 at begin, 1 at end
 # gain has bounds [1, 648).
 # dots has bounds [650, 2421).
 # flash has bounds [2423, 3077).
@@ -175,3 +216,5 @@ with viewer.txn() as s:
       source=ng.LocalVolume(traces_condition, dimensions))
   s.layout = 'xy'
 viewer
+
+# %%

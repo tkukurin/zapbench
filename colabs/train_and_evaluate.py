@@ -63,10 +63,11 @@ import treescope
 treescope.basic_interactive_setup(autovisualize_arrays=True)
 
 # %% id="_CxkG54Xozzh"
-source[0]
 
-# %% [markdown] id="Y86dC5PupINB"
-# ... when indexing into the data source, we get `series_input`, i.e., past activity of `num_timesteps_context` length, and `series_output`, 32 timesteps of subsequent activity (the prediction horizon used in ZAPBench).
+# NOTE(tk) 3:11m on Mac M4 (render)
+source[0]
+# `series_input`: past activity of `num_timesteps_context`
+# `series_output`: 32 timesteps of subsequent activity (ZAPBench prediction horizon).
 
 # %% [markdown] id="vEO_xsi0p_1N"
 # By enabling `prefetch` on `data_source.TensorStoreTimeSeries`, we can load the entire data into memory upfront. This makes indexing significantly faster once the source has been initialized.
@@ -81,6 +82,8 @@ source = data_source.TensorStoreTimeSeries(config, prefetch=False)  # Default
 _ = source[random.randint(0, len(source)-1)]
 
 # %% id="lktbCrGZqwQ7"
+
+# NOTE(tk) 4:52m on Mac M4
 source = data_source.TensorStoreTimeSeries(config, prefetch=True)
 
 # %% id="_zlzE3uqqxp_"
@@ -142,22 +145,10 @@ data_loader = grain.DataLoader(
     worker_count=0
 )
 
-# %% [markdown] id="SWrrKBcC2Tm1"
-# We can iterate over the data loader which will get elements with a batch dimension in random order for `num_epochs`:
+# We can iterate over the data loader which will get
+# elements with a batch dimension in random order for
+# `num_epochs`
 
-# %% id="nxH1JlSE2S5u"
-from tqdm import tqdm
-
-
-for element in tqdm(data_loader):
-  #
-  # ... train model with element
-  #
-  continue
-
-element
-
-# %% [markdown] id="VfDi9Inz2tNx"
 # `grain` has many useful features -- for example, we can easily add operations to the data loader to adjust shapes, or add augmentations. More details are in [grain's DataLoader guide](https://google-grain.readthedocs.io/en/latest/tutorials/data_loader_tutorial.html).
 
 # %% [markdown] id="5dR8YHzt3yo4"
@@ -227,8 +218,6 @@ for condition_id, condition_name in tqdm(enumerate(constants.CONDITION_NAMES)):
 
     MAEs[condition_name].append(np.array(mae))
 
-# %% [markdown] id="MG1BcCHseex2"
-# ... let's plot our results:
 
 # %% id="3RlJY6t5HaKB"
 import matplotlib.pyplot as plt
