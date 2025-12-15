@@ -38,8 +38,7 @@ dependencies = [
   "tensorstore",
   "tensorflow-probability",  # required by distrax
   "tf-keras",  # required by tensorflow-probability,
-  "ipykernel",
-  "matplotlib",
+  # "ipykernel",
 ]
 
 # `version` is automatically set by flit to use `zapbench.__version__`
