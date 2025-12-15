@@ -16,7 +16,12 @@
 # pylint: disable=line-too-long
 
 # Marks the beginning of condition 0 to 8; final number is the end of timeseries
-CONDITION_OFFSETS = (0, 649, 2422, 3078, 3735, 5047, 5638, 6623, 7279, 7879)
+# NOTE(tk) offsets coupled to names
+CONDITION_OFFSETS = (
+  0, 649, 2422, 3078, 3735, 5047, 5638, 6623, 7279, 7879)
+CONDITION_NAMES = (
+  'gain', 'dots', 'flash', 'taxis', 'turning', 'position',
+  'open loop', 'rotation', 'dark')
 
 # Number of timesteps excluded at the beginning and end of each condition
 CONDITION_PADDING = 1
@@ -26,9 +31,6 @@ CONDITIONS_TRAIN = (0, 1, 2, 4, 5, 6, 7, 8)
 CONDITIONS_HOLDOUT = (3,)
 CONDITIONS = CONDITIONS_TRAIN + CONDITIONS_HOLDOUT
 
-# Condition names
-CONDITION_NAMES = ('gain', 'dots', 'flash', 'taxis', 'turning', 'position',
-                   'open loop', 'rotation', 'dark')
 
 # Recommended fraction of timesteps per condition used as validation set
 VAL_FRACTION = 0.1
